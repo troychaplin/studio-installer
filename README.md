@@ -10,6 +10,37 @@ domain, HTTPS, PHP and WordPress versions, and the admin login.
 - WordPress Studio with its CLI enabled (Studio > Settings), tested with CLI 2.2.0
 - Docker Desktop, only for the MySQL option
 
+## Get started
+
+**To keep your own copy** (for example to change the defaults or the templates), click
+**Use this template** at the top of this repo's GitHub page, create your repo, then clone it:
+
+```bash
+git clone https://github.com/<you>/<your-repo>.git
+cd <your-repo>
+./install.sh
+```
+
+A template copy starts with fresh history and doesn't get later changes automatically. To pull
+them in, add this repo as a remote and merge from it:
+
+```bash
+git remote add upstream https://github.com/troychaplin/studio-installer.git
+git fetch upstream
+git merge upstream/main --allow-unrelated-histories
+```
+
+**To just run it**, clone this repo:
+
+```bash
+git clone https://github.com/troychaplin/studio-installer.git
+cd studio-installer
+./install.sh
+```
+
+The installer creates each site in its own folder (`~/Studio/<slug>` by default), not inside
+this repo, so one copy can create as many sites as you like.
+
 ## Usage
 
 ```bash
@@ -51,3 +82,7 @@ scripts/subsite-links.sh --path=<site folder>
 - [docs/setup.md](docs/setup.md): what the installer does, step by step
 - [docs/studio-workarounds.md](docs/studio-workarounds.md): where it steers around Studio's behaviour, and why
 - [docs/docker-mysql.md](docs/docker-mysql.md): the MySQL option
+
+## License
+
+[MIT](LICENSE)
