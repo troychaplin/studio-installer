@@ -12,25 +12,76 @@ domain, HTTPS, PHP and WordPress versions, and the admin login.
 
 ## Get started
 
-**To keep your own copy** (for example to change the defaults or the templates), click
-**Use this template** at the top of this repo's GitHub page, create your repo, then clone it:
+There are two ways to use this repo. Either way, the installer creates each site in its own
+folder (`~/Studio/<slug>` by default), not inside the repo, so one copy can create as many sites
+as you like.
+
+| | Use as a template | Clone this repo |
+|---|---|---|
+| Best for | Changing the installer for yourself or your team | Running it as it is |
+| You get | Your own repo, with fresh history | A copy of this repo |
+| Updates | Merge them in yourself (see below) | `git pull` |
+
+### Use as a template
+
+1. On this repo's GitHub page, click **Use this template** > **Create a new repository**.
+2. Choose an owner (you or your organisation) and a name, pick public or private, and click
+   **Create repository**.
+3. Clone your new repo and run the installer:
+
+   ```bash
+   git clone https://github.com/<owner>/<your-repo>.git
+   cd <your-repo>
+   ./install.sh
+   ```
+
+Or do all three steps with the [GitHub CLI](https://cli.github.com/):
 
 ```bash
-git clone https://github.com/<you>/<your-repo>.git
+gh repo create <your-repo> --template troychaplin/studio-installer --private --clone
 cd <your-repo>
 ./install.sh
 ```
 
-A template copy starts with fresh history and doesn't get later changes automatically. To pull
-them in, add this repo as a remote and merge from it:
+Things you might change in your copy:
+
+- The defaults in the "Questions" section of `install.sh` (PHP version, admin username and
+  email, and so on), and `MYSQL_IMAGE` and `MYSQL_FIRST_PORT` at the top.
+- `templates/docker-compose.yml`, for example to add phpMyAdmin or Mailpit.
+- `templates/wp-config-multisite.php`, for extra constants on multisite.
+
+### Get updates from this template
+
+A repo made from a template doesn't share history with it, so GitHub won't offer updates. Pull
+them in with git instead.
+
+**Connect your repo to this one once, right after creating it and before you change anything.**
+Add this repo as a remote called `upstream` and merge it. Nothing changes in your files; the merge
+only records where your copy started, so later updates merge cleanly:
 
 ```bash
 git remote add upstream https://github.com/troychaplin/studio-installer.git
 git fetch upstream
-git merge upstream/main --allow-unrelated-histories
+git merge upstream/main --allow-unrelated-histories -m "Connect to studio-installer template"
+git push
 ```
 
-**To just run it**, clone this repo:
+`--allow-unrelated-histories` is needed for this first merge only. If you've already changed
+files before connecting, the first merge reports a conflict in every file you changed, even
+where this repo hasn't touched it; keep your version of each.
+
+After that, update with:
+
+```bash
+git fetch upstream
+git merge upstream/main
+```
+
+If you've changed a file that was also changed here, git stops with a conflict in that file.
+Edit it to keep the parts you want, then `git add` it and `git commit`. Push to your own repo
+with `git push` as usual.
+
+### Clone this repo
 
 ```bash
 git clone https://github.com/troychaplin/studio-installer.git
@@ -38,8 +89,7 @@ cd studio-installer
 ./install.sh
 ```
 
-The installer creates each site in its own folder (`~/Studio/<slug>` by default), not inside
-this repo, so one copy can create as many sites as you like.
+Get updates with `git pull`.
 
 ## Usage
 
