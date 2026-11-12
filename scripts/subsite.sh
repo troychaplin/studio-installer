@@ -12,7 +12,7 @@
 # index.php, so subsite pages still go through WordPress as normal. If the site
 # folder is a git repo, the folders are added to .git/info/exclude.
 #
-# Usage: scripts/add-subsite.sh [options]
+# Usage: scripts/subsite.sh [options]
 #
 #   --slug=<slug>          Subsite path, e.g. "news" for /news/ (asked if missing)
 #   --title=<title>        Subsite title                (default: from the slug)

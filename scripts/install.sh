@@ -464,9 +464,9 @@ if [ "$TYPE" = "multisite" ]; then
     echo
     echo "Add subsites with this, so their /wp-admin/ works in Studio:"
     if [ "$IN_REPO" = true ]; then
-        echo "  scripts/add-subsite.sh --slug=<slug>"
+        echo "  scripts/subsite.sh --slug=<slug>"
     else
-        echo "  $SCRIPT_DIR/add-subsite.sh --slug=<slug> --path=\"$SITE_PATH\""
+        echo "  $SCRIPT_DIR/subsite.sh --slug=<slug> --path=\"$SITE_PATH\""
     fi
     echo "For subsites made in the network admin, run it with --links-only afterwards."
 fi

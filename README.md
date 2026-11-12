@@ -127,7 +127,7 @@ Studio needs a folder of symlinks per subsite for the subsite's `/wp-admin/` to 
 subsites with this script. It creates the subsite, then adds the links:
 
 ```bash
-scripts/add-subsite.sh --slug=news --title="News"
+scripts/subsite.sh --slug=news --title="News"
 ```
 
 | Option | What it does | Default |
@@ -138,7 +138,7 @@ scripts/add-subsite.sh --slug=news --title="News"
 | `--path=` | The network's folder | the folder above `scripts/` |
 | `--links-only` | Create no subsite; add links for any subsite that has none | |
 
-If you create a subsite in the network admin instead, run `scripts/add-subsite.sh --links-only`
+If you create a subsite in the network admin instead, run `scripts/subsite.sh --links-only`
 afterwards.
 
 ## Removing a site

@@ -13,7 +13,7 @@ Tested with Studio CLI 2.2.0.
   `/<slug>/wp-includes/`, `/<slug>/wp-content/` and `/<slug>/wp-*.php` to the real files at the
   root. Studio's router only runs a file if one exists at the exact path, and sends everything
   else to `index.php`. WordPress then redirects the request to itself, in a loop.
-- **Fix:** `scripts/add-subsite.sh` creates the subsite, then a `<slug>/` folder in the site root
+- **Fix:** `scripts/subsite.sh` creates the subsite, then a `<slug>/` folder in the site root
   for each subsite. The folder holds symlinks to `wp-admin`, `wp-includes`, `wp-content` and the `wp-*.php`
   entry points, so the router finds real files. It has no `index.php`, so subsite pages still go
   through WordPress.
