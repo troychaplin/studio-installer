@@ -7,11 +7,11 @@
 # Every question has a flag. Anything not given as a flag is asked, or takes
 # its default with --yes.
 #
-# Usage: ./install.sh [options]
+# Usage: scripts/install.sh [options]
 #
 #   --name=<name>            Site name                      (default: My Site)
-#   --path=<folder>          Site folder: this script's folder, or a missing or
-#                            empty one                      (default: this script's folder)
+#   --path=<folder>          Site folder: the repo folder (the one above scripts/),
+#                            or a missing or empty one      (default: the repo folder)
 #   --type=<type>            single | multisite (subdirectories)   (default: single)
 #   --domain=<name.local>    Custom domain, or "none" for http://localhost:<port>
 #                                                           (default: <slug>.local)
@@ -28,8 +28,10 @@
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TEMPLATES="$ROOT_DIR/templates"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# The repo folder, above scripts/. WordPress goes here by default.
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+TEMPLATES="$SCRIPT_DIR/templates"
 
 MYSQL_IMAGE="mysql:8.4"
 MYSQL_FIRST_PORT=3381
@@ -163,8 +165,8 @@ SITE_PATH="${SITE_PATH%/}"
 choose TYPE "Site type" 1 "single|Single site" "multisite|Multisite with subdirectories (example.local/news/)"
 [ "$TYPE" = "subdirectory" ] && TYPE="multisite"
 # Studio only routes and certifies the site's own domain, so subsites on
-# subdomains can't be reached. See docs/studio-workarounds.md.
-[ "$TYPE" = "subdomain" ] && fail "Subdomain networks don't work in Studio (see docs/studio-workarounds.md). Use --type=multisite."
+# subdomains can't be reached. See docs/studio-installer/studio-workarounds.md.
+[ "$TYPE" = "subdomain" ] && fail "Subdomain networks don't work in Studio (see docs/studio-installer/studio-workarounds.md). Use --type=multisite."
 one_of "$TYPE" single multisite || fail "--type must be single or multisite."
 
 ask DOMAIN "Custom domain (must end in .local), or 'none' for http://localhost:<port>" "$SLUG.local"
@@ -216,18 +218,18 @@ fi
 # Checks
 # ---------------------------------------------------------------------------
 
-# The script's own folder may hold the installer's files (and anything else
+# The repo folder may hold the installer's files (and anything else
 # you keep in your copy of the repo), but not WordPress. Any other folder must
 # be missing or empty.
-IN_SCRIPT_DIR=false
+IN_REPO=false
 if [ -d "$SITE_PATH" ] && [ "$(cd "$SITE_PATH" && pwd -P)" = "$(cd "$ROOT_DIR" && pwd -P)" ]; then
-    IN_SCRIPT_DIR=true
+    IN_REPO=true
     for f in wp-load.php wp-config.php wp-content; do
         [ -e "$SITE_PATH/$f" ] && fail "$SITE_PATH already has WordPress in it ($f). This installer is for a new site."
     done
 elif [ -e "$SITE_PATH" ]; then
     [ -d "$SITE_PATH" ] || fail "$SITE_PATH exists and isn't a folder."
-    [ -z "$(ls -A "$SITE_PATH")" ] || fail "$SITE_PATH isn't empty. Choose this script's folder, or a new or empty one."
+    [ -z "$(ls -A "$SITE_PATH")" ] || fail "$SITE_PATH isn't empty. Choose the repo folder ($ROOT_DIR), or a new or empty one."
 fi
 
 SITES_JSON="$(studio list --format json 2>/dev/null | grep '^\[' || true)"
@@ -284,9 +286,9 @@ on_exit() {
     [ "$CREATED" = true ] || return 0
     echo
     echo "Setup stopped before it finished. To remove the half-made site:"
-    if [ "$IN_SCRIPT_DIR" = true ]; then
+    if [ "$IN_REPO" = true ]; then
         # Without --no-files Studio would move this whole folder to the trash,
-        # including install.sh and .git.
+        # including scripts/ and .git.
         echo "  studio delete --path=\"$SITE_PATH\" --no-files"
         echo "  git -C \"$SITE_PATH\" clean -fdX    # removes WordPress; preview with -ndX first"
     else
@@ -305,9 +307,9 @@ step "Studio site"
 mkdir -p "$SITE_PATH"
 
 # Studio only creates a site in an empty folder or one that already holds
-# WordPress. For this script's folder, let Studio set WordPress up in an empty
+# WordPress. For the repo folder, let Studio set WordPress up in an empty
 # temporary folder first, move it in, and forget the temporary site.
-if [ "$IN_SCRIPT_DIR" = true ]; then
+if [ "$IN_REPO" = true ]; then
     STAGE="$(mktemp -d "${TMPDIR:-/tmp}/studio-installer.XXXXXX")"
     echo "Preparing WordPress in a temporary folder"
     CREATED=true
@@ -461,14 +463,14 @@ fi
 if [ "$TYPE" = "multisite" ]; then
     echo
     echo "Add subsites with this, so their /wp-admin/ works in Studio:"
-    if [ "$IN_SCRIPT_DIR" = true ]; then
+    if [ "$IN_REPO" = true ]; then
         echo "  scripts/add-subsite.sh --slug=<slug>"
     else
-        echo "  $ROOT_DIR/scripts/add-subsite.sh --slug=<slug> --path=\"$SITE_PATH\""
+        echo "  $SCRIPT_DIR/add-subsite.sh --slug=<slug> --path=\"$SITE_PATH\""
     fi
     echo "For subsites made in the network admin, run it with --links-only afterwards."
 fi
-if [ "$IN_SCRIPT_DIR" = true ]; then
+if [ "$IN_REPO" = true ]; then
     echo
     echo "To remove this site later, keep its files out of Studio's delete:"
     echo "  studio delete --path=\"$SITE_PATH\" --no-files"

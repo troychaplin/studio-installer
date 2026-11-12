@@ -12,9 +12,9 @@ domain, HTTPS, PHP and WordPress versions, and the admin login.
 
 ## Get started
 
-There are two ways to use this repo. Either way, the installer puts WordPress **in the same
-folder as `install.sh`** by default, so your copy of the repo becomes the site: one copy per site.
-Your own themes and plugins in `wp-content/` can be committed alongside the installer, while
+There are two ways to use this repo. Either way, the installer puts WordPress **in the repo
+folder** by default, so your copy of the repo becomes the site: one copy per site. The installer
+and its files live in `scripts/`, which keeps the root free for WordPress. Your own themes and plugins in `wp-content/` can be committed alongside the installer, while
 WordPress core, the database and Studio's files are gitignored. To create a site somewhere else
 instead, enter a new or empty folder at the "Site folder" question.
 
@@ -34,7 +34,7 @@ instead, enter a new or empty folder at the "Site folder" question.
    ```bash
    git clone https://github.com/<owner>/<your-repo>.git
    cd <your-repo>
-   ./install.sh
+   scripts/install.sh
    ```
 
 Or do all three steps with the [GitHub CLI](https://cli.github.com/):
@@ -42,15 +42,15 @@ Or do all three steps with the [GitHub CLI](https://cli.github.com/):
 ```bash
 gh repo create <your-repo> --template troychaplin/studio-installer --private --clone
 cd <your-repo>
-./install.sh
+scripts/install.sh
 ```
 
 Things you might change in your copy:
 
-- The defaults in the "Questions" section of `install.sh` (PHP version, admin username and
+- The defaults in the "Questions" section of `scripts/install.sh` (PHP version, admin username and
   email, and so on), and `MYSQL_IMAGE` and `MYSQL_FIRST_PORT` at the top.
-- `templates/docker-compose.yml`, for example to add phpMyAdmin or Mailpit.
-- `templates/wp-config-multisite.php`, for extra constants on multisite.
+- `scripts/templates/docker-compose.yml`, for example to add phpMyAdmin or Mailpit.
+- `scripts/templates/wp-config-multisite.php`, for extra constants on multisite.
 
 ### Get updates from this template
 
@@ -88,7 +88,7 @@ with `git push` as usual.
 ```bash
 git clone https://github.com/troychaplin/studio-installer.git
 cd studio-installer
-./install.sh
+scripts/install.sh
 ```
 
 Get updates with `git pull`.
@@ -96,19 +96,19 @@ Get updates with `git pull`.
 ## Usage
 
 ```bash
-./install.sh
+scripts/install.sh
 ```
 
 Press Enter to accept a default. Every question also has a flag, and `--yes` skips the questions:
 
 ```bash
-./install.sh --yes --name="My Network" --type=multisite --domain=my-network.local
+scripts/install.sh --yes --name="My Network" --type=multisite --domain=my-network.local
 ```
 
 | Question | Flag | Default |
 |---|---|---|
 | Site name | `--name=` | `My Site` |
-| Site folder: this script's folder, or a missing or empty one | `--path=` | this script's folder |
+| Site folder: the repo folder, or a missing or empty one | `--path=` | the repo folder |
 | Single site or multisite | `--type=single\|multisite` | `single` |
 | Custom domain, or `none` for `http://localhost:<port>` | `--domain=` | `<slug>.local` |
 | HTTPS (custom domain only) | `--https` / `--no-https` | on |
@@ -119,7 +119,7 @@ Press Enter to accept a default. Every question also has a flag, and `--yes` ski
 | Admin username, email, password | `--admin-user=`, `--admin-email=`, `--admin-password=` | `admin`, `admin@localhost.com`, generated |
 
 Multisite is subdirectory only. Subdomain networks can't be served by Studio; see
-[docs/studio-workarounds.md](docs/studio-workarounds.md).
+[docs/studio-installer/studio-workarounds.md](docs/studio-installer/studio-workarounds.md).
 
 ## Adding subsites
 
@@ -143,8 +143,8 @@ afterwards.
 
 ## Removing a site
 
-For a site in the script's folder, **always pass `--no-files`** to `studio delete`. Without it,
-Studio moves the whole folder to the trash, including `install.sh` and `.git`:
+For a site in the repo folder, **always pass `--no-files`** to `studio delete`. Without it,
+Studio moves the whole folder to the trash, including `scripts/` and `.git`:
 
 ```bash
 studio delete --no-files
@@ -159,9 +159,9 @@ A site in a folder of its own can be removed with `studio delete --path=<site fo
 
 ## More
 
-- [docs/setup.md](docs/setup.md): what the installer does, step by step
-- [docs/studio-workarounds.md](docs/studio-workarounds.md): where it steers around Studio's behaviour, and why
-- [docs/docker-mysql.md](docs/docker-mysql.md): the MySQL option
+- [docs/studio-installer/setup.md](docs/studio-installer/setup.md): what the installer does, step by step
+- [docs/studio-installer/studio-workarounds.md](docs/studio-installer/studio-workarounds.md): where it steers around Studio's behaviour, and why
+- [docs/studio-installer/docker-mysql.md](docs/studio-installer/docker-mysql.md): the MySQL option
 
 ## License
 

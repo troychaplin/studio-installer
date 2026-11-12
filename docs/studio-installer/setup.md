@@ -1,7 +1,7 @@
 # How the installer works
 
-`install.sh` creates a new Studio site, by default in the folder that holds `install.sh`, so the
-repo becomes the site. It can also use any new or empty folder. Studio copies WordPress in; the
+`scripts/install.sh` creates a new Studio site, by default in the repo folder (the one above
+`scripts/`), so the repo becomes the site. It can also use any new or empty folder. Studio copies WordPress in; the
 installer then adjusts the database and multisite setup to match your answers. The questions
 and flags are listed in the [README](../README.md).
 
@@ -26,7 +26,7 @@ and flags are listed in the [README](../README.md).
 3. **MySQL (optional).** See [docker-mysql.md](docker-mysql.md).
 4. **Multisite (optional).** Runs `studio wp core multisite-convert`, which creates the network
    tables and adds the multisite constants to `wp-config.php`. With a custom domain, the installer
-   then stops the site, inserts `templates/wp-config-multisite.php` above the "stop editing" line,
+   then stops the site, inserts `scripts/templates/wp-config-multisite.php` above the "stop editing" line,
    and starts it again. See [studio-workarounds.md](studio-workarounds.md) for why.
 5. **HTTPS certificate (HTTPS only).** Trusts Studio's root certificate in the macOS login
    keychain if it isn't trusted yet. macOS asks for your password.
@@ -38,8 +38,8 @@ If a step fails after the site is created, the installer prints the commands to 
 
 | File | Used for |
 |---|---|
-| `templates/docker-compose.yml` | Copied to the site folder for MySQL, with the project name, container name, image and port filled in. |
-| `templates/wp-config-multisite.php` | Inserted into `wp-config.php` for a multisite on a custom domain. |
+| `scripts/templates/docker-compose.yml` | Copied to the site folder for MySQL, with the project name, container name, image and port filled in. |
+| `scripts/templates/wp-config-multisite.php` | Inserted into `wp-config.php` for a multisite on a custom domain. |
 
 ## The admin login
 
@@ -56,7 +56,7 @@ installer runs; leave it out to be asked for it, or to have one generated.
 - Change Studio settings with `studio config set` (`--php`, `--xdebug`, `--admin-password`, …).
   Don't change the domain of a multisite: the network's domain is stored in its database and
   `wp-config.php`.
-- Remove a site in the script's folder with `studio delete --no-files` (without `--no-files`
+- Remove a site in the repo folder with `studio delete --no-files` (without `--no-files`
   Studio trashes the whole folder, repo included), then `git clean -fdX` to remove the ignored
   WordPress files. Preview with `git clean -ndX` first. A site in its own folder can be removed
   with `studio delete --path=<site folder>`. For MySQL, also run

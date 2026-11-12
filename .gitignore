@@ -1,7 +1,7 @@
 .DS_Store
 
 # ---------------------------------------------------------------------------
-# A site installed in this folder by install.sh. Your own themes, plugins and
+# A site installed in this folder by scripts/install.sh. Your own themes, plugins and
 # mu-plugins in wp-content/ stay tracked; everything else is local.
 # `git clean -fdX` removes all of it (preview with `git clean -ndX`).
 # ---------------------------------------------------------------------------
@@ -37,5 +37,5 @@
 /.agents/
 /.claude/skills/
 
-# MySQL option: made from templates/docker-compose.yml with this machine's port
+# MySQL option: made from scripts/templates/docker-compose.yml with this machine's port
 /docker-compose.yml

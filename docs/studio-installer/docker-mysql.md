@@ -6,14 +6,14 @@ With `--db=mysql`, Studio still serves PHP; only the database runs in Docker.
 
 1. Creates the Studio site without starting it. At this point the folder has WordPress and the
    SQLite drop-in, but no `wp-config.php` and no database yet.
-2. Copies `templates/docker-compose.yml` to the site folder and fills in the values below, then
+2. Copies `scripts/templates/docker-compose.yml` to the site folder and fills in the values below, then
    runs `docker compose up -d --wait`.
 
    | Setting | Value |
    |---|---|
    | Compose project | `<slug>-studio` (volume `<slug>-studio_mysql-data`) |
    | Container | `<slug>-studio-mysql` |
-   | Image | `mysql:8.4` (`MYSQL_IMAGE` at the top of `install.sh`) |
+   | Image | `mysql:8.4` (`MYSQL_IMAGE` at the top of `scripts/install.sh`) |
    | Host/port | `127.0.0.1:<port>`, first free port from 3381 or `--db-port` |
    | Database | `wordpress` (Studio forces `DB_NAME` to `wordpress`) |
    | User/pass | `wp` / `wp` (root: `root`) |

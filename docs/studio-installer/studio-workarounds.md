@@ -30,7 +30,7 @@ Tested with Studio CLI 2.2.0.
   doesn't recognise `localhost:<port>` and answers with a redirect, so Studio's request fails. In
   the project this installer came from, that stopped the site from starting ("PHP error during
   startup"; the daemon log says `Failed to set admin credentials: fetch failed`).
-- **Fix:** `templates/wp-config-multisite.php` rewrites `HTTP_HOST` from `localhost` or
+- **Fix:** `scripts/templates/wp-config-multisite.php` rewrites `HTTP_HOST` from `localhost` or
   `127.0.0.1` (any port) to `DOMAIN_CURRENT_SITE`. The installer inserts it into `wp-config.php`
   after converting to multisite. Browser traffic uses the custom domain, so only Studio's own
   requests are affected.
@@ -55,7 +55,7 @@ temporary folder first; see [setup.md](setup.md).
 ### `studio delete` trashes the whole folder
 
 `studio delete` moves the site's entire folder to the trash by default. For a site installed in
-the repo folder that includes `install.sh` and `.git`, so use `studio delete --no-files` there.
+the repo folder that includes `scripts/` and `.git`, so use `studio delete --no-files` there.
 
 ### Its own prompts
 
