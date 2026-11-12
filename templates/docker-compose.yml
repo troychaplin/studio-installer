@@ -1,0 +1,29 @@
+# MySQL for a WordPress Studio site. Studio still serves PHP; only the
+# database runs in Docker. install.sh fills in the {{...}} values.
+#
+# The project name, container name and host port must be unique per site:
+# Compose treats two files with the same project name as one stack.
+name: {{PROJECT}}
+
+services:
+  mysql:
+    image: {{IMAGE}}
+    container_name: {{CONTAINER}}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:{{PORT}}:3306"
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wp
+      MYSQL_PASSWORD: wp
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uwp", "-pwp"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  mysql-data:
