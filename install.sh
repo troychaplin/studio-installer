@@ -454,18 +454,23 @@ else
     echo "Password:  the one you entered"
 fi
 echo "Folder:    $SITE_PATH"
-if [ "$IN_SCRIPT_DIR" = true ]; then
-    echo
-    echo "To remove this site later, keep its files out of Studio's delete:"
-    echo "  studio delete --path=\"$SITE_PATH\" --no-files"
-    echo "  git clean -fdX    # removes WordPress and the database; preview with -ndX first"
-fi
 if [ "$DB" = "mysql" ]; then
     echo "MySQL:     127.0.0.1:$DB_PORT, database 'wordpress', user 'wp', password 'wp'"
     echo "           Start and stop it from the site folder with: docker compose up -d / docker compose stop"
 fi
 if [ "$TYPE" = "multisite" ]; then
     echo
-    echo "After adding a subsite, run this so its /wp-admin/ works:"
-    echo "  $ROOT_DIR/scripts/subsite-links.sh --path=\"$SITE_PATH\""
+    echo "Add subsites with this, so their /wp-admin/ works in Studio:"
+    if [ "$IN_SCRIPT_DIR" = true ]; then
+        echo "  scripts/add-subsite.sh --slug=<slug>"
+    else
+        echo "  $ROOT_DIR/scripts/add-subsite.sh --slug=<slug> --path=\"$SITE_PATH\""
+    fi
+    echo "For subsites made in the network admin, run it with --links-only afterwards."
+fi
+if [ "$IN_SCRIPT_DIR" = true ]; then
+    echo
+    echo "To remove this site later, keep its files out of Studio's delete:"
+    echo "  studio delete --path=\"$SITE_PATH\" --no-files"
+    echo "  git clean -fdX    # removes WordPress and the database; preview with -ndX first"
 fi

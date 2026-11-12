@@ -121,13 +121,25 @@ Press Enter to accept a default. Every question also has a flag, and `--yes` ski
 Multisite is subdirectory only. Subdomain networks can't be served by Studio; see
 [docs/studio-workarounds.md](docs/studio-workarounds.md).
 
-## After adding a subsite
+## Adding subsites
 
-Studio needs a folder of symlinks per subsite for its `/wp-admin/` to work:
+Studio needs a folder of symlinks per subsite for the subsite's `/wp-admin/` to work, so add
+subsites with this script. It creates the subsite, then adds the links:
 
 ```bash
-scripts/subsite-links.sh --path=<site folder>
+scripts/add-subsite.sh --slug=news --title="News"
 ```
+
+| Option | What it does | Default |
+|---|---|---|
+| `--slug=` | Subsite path, e.g. `news` for `/news/` | asked |
+| `--title=` | Subsite title | from the slug (`team-blog` → `Team Blog`) |
+| `--email=` | Subsite admin's email | the network's super admin |
+| `--path=` | The network's folder | the folder above `scripts/` |
+| `--links-only` | Create no subsite; add links for any subsite that has none | |
+
+If you create a subsite in the network admin instead, run `scripts/add-subsite.sh --links-only`
+afterwards.
 
 ## Removing a site
 

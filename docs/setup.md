@@ -51,7 +51,8 @@ installer runs; leave it out to be asked for it, or to have one generated.
 ## After setup
 
 - WP-CLI: `studio wp <command>` in the site folder. For a subsite, add `--url=<subsite URL>`.
-- After adding a subsite, run `scripts/subsite-links.sh --path=<site folder>`.
+- Add subsites with `scripts/add-subsite.sh --slug=<slug>`, which creates the subsite and its
+  link folder. After creating one in the network admin, run `scripts/add-subsite.sh --links-only`.
 - Change Studio settings with `studio config set` (`--php`, `--xdebug`, `--admin-password`, …).
   Don't change the domain of a multisite: the network's domain is stored in its database and
   `wp-config.php`.
@@ -67,4 +68,4 @@ installer runs; leave it out to be asked for it, or to have one generated.
 `themes/`, `plugins/` and `mu-plugins/`, the default themes and plugins, Studio's SQLite drop-in
 and loader, Studio's AI files, and the generated `docker-compose.yml`. Your own themes, plugins
 and mu-plugins show up in `git status` and can be committed. Subsite link folders are added to
-`.git/info/exclude` by `scripts/subsite-links.sh`.
+`.git/info/exclude` by `scripts/add-subsite.sh`.
