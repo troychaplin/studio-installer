@@ -12,13 +12,15 @@ domain, HTTPS, PHP and WordPress versions, and the admin login.
 
 ## Get started
 
-There are two ways to use this repo. Either way, the installer creates each site in its own
-folder (`~/Studio/<slug>` by default), not inside the repo, so one copy can create as many sites
-as you like.
+There are two ways to use this repo. Either way, the installer puts WordPress **in the same
+folder as `install.sh`** by default, so your copy of the repo becomes the site: one copy per site.
+Your own themes and plugins in `wp-content/` can be committed alongside the installer, while
+WordPress core, the database and Studio's files are gitignored. To create a site somewhere else
+instead, enter a new or empty folder at the "Site folder" question.
 
 | | Use as a template | Clone this repo |
 |---|---|---|
-| Best for | Changing the installer for yourself or your team | Running it as it is |
+| Best for | A site project of your own, or changing the installer | Trying it out, or a throwaway site |
 | You get | Your own repo, with fresh history | A copy of this repo |
 | Updates | Merge them in yourself (see below) | `git pull` |
 
@@ -106,7 +108,7 @@ Press Enter to accept a default. Every question also has a flag, and `--yes` ski
 | Question | Flag | Default |
 |---|---|---|
 | Site name | `--name=` | `My Site` |
-| Site folder (missing or empty) | `--path=` | `~/Studio/<slug>` |
+| Site folder: this script's folder, or a missing or empty one | `--path=` | this script's folder |
 | Single site or multisite | `--type=single\|multisite` | `single` |
 | Custom domain, or `none` for `http://localhost:<port>` | `--domain=` | `<slug>.local` |
 | HTTPS (custom domain only) | `--https` / `--no-https` | on |
@@ -126,6 +128,22 @@ Studio needs a folder of symlinks per subsite for its `/wp-admin/` to work:
 ```bash
 scripts/subsite-links.sh --path=<site folder>
 ```
+
+## Removing a site
+
+For a site in the script's folder, **always pass `--no-files`** to `studio delete`. Without it,
+Studio moves the whole folder to the trash, including `install.sh` and `.git`:
+
+```bash
+studio delete --no-files
+git clean -ndX    # preview what would be removed
+git clean -fdX    # remove WordPress core, the database, uploads and Studio's files
+```
+
+`git clean -X` only removes gitignored files, so your committed and untracked work stays. For
+MySQL, also run `docker compose -p <slug>-studio down -v` to remove the database container.
+
+A site in a folder of its own can be removed with `studio delete --path=<site folder>`.
 
 ## More
 

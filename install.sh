@@ -10,7 +10,8 @@
 # Usage: ./install.sh [options]
 #
 #   --name=<name>            Site name                      (default: My Site)
-#   --path=<folder>          Site folder, missing or empty  (default: ~/Studio/<slug>)
+#   --path=<folder>          Site folder: this script's folder, or a missing or
+#                            empty one                      (default: this script's folder)
 #   --type=<type>            single | multisite (subdirectories)   (default: single)
 #   --domain=<name.local>    Custom domain, or "none" for http://localhost:<port>
 #                                                           (default: <slug>.local)
@@ -130,7 +131,7 @@ for arg in "$@"; do
         --admin-email=*)    ADMIN_EMAIL="${arg#*=}" ;;
         --admin-password=*) ADMIN_PASSWORD="${arg#*=}" ;;
         --yes|-y)           YES=true ;;
-        -h|--help)          sed -n '3,27p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help)          sed -n '3,28p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *)                  fail "Unknown option: $arg (see --help)" ;;
     esac
 done
@@ -150,7 +151,7 @@ ask NAME "Site name" "My Site"
 SLUG="$(slugify "$NAME")"
 [ -n "$SLUG" ] || fail "The site name needs at least one letter or number."
 
-ask SITE_PATH "Site folder" "$HOME/Studio/$SLUG"
+ask SITE_PATH "Site folder" "$ROOT_DIR"
 case "$SITE_PATH" in
     "~")   SITE_PATH="$HOME" ;;
     "~/"*) SITE_PATH="$HOME/${SITE_PATH#\~/}" ;;
@@ -215,12 +216,24 @@ fi
 # Checks
 # ---------------------------------------------------------------------------
 
-if [ -e "$SITE_PATH" ]; then
+# The script's own folder may hold the installer's files (and anything else
+# you keep in your copy of the repo), but not WordPress. Any other folder must
+# be missing or empty.
+IN_SCRIPT_DIR=false
+if [ -d "$SITE_PATH" ] && [ "$(cd "$SITE_PATH" && pwd -P)" = "$(cd "$ROOT_DIR" && pwd -P)" ]; then
+    IN_SCRIPT_DIR=true
+    for f in wp-load.php wp-config.php wp-content; do
+        [ -e "$SITE_PATH/$f" ] && fail "$SITE_PATH already has WordPress in it ($f). This installer is for a new site."
+    done
+elif [ -e "$SITE_PATH" ]; then
     [ -d "$SITE_PATH" ] || fail "$SITE_PATH exists and isn't a folder."
-    [ -z "$(ls -A "$SITE_PATH")" ] || fail "$SITE_PATH isn't empty. Choose a new or empty folder."
+    [ -z "$(ls -A "$SITE_PATH")" ] || fail "$SITE_PATH isn't empty. Choose this script's folder, or a new or empty one."
 fi
 
 SITES_JSON="$(studio list --format json 2>/dev/null | grep '^\[' || true)"
+if printf '%s' "$SITES_JSON" | grep -qF "\"path\":\"$SITE_PATH\""; then
+    fail "$SITE_PATH is already a Studio site."
+fi
 if [ -n "$DOMAIN" ] && printf '%s' "$SITES_JSON" | grep -qF "\"customDomain\":\"$DOMAIN\""; then
     fail "Another Studio site already uses $DOMAIN."
 fi
@@ -260,11 +273,25 @@ fi
 
 # From here on a failure can leave a half-made site behind. Say how to remove it.
 CREATED=false
+STAGE=""
 on_exit() {
-    [ "$?" -ne 0 ] && [ "$CREATED" = true ] || return 0
+    [ "$?" -ne 0 ] || return 0
+    # A leftover staging site is only ever a temporary folder; remove it.
+    if [ -n "$STAGE" ] && [ -d "$STAGE" ]; then
+        studio delete --path="$STAGE" >/dev/null 2>&1 || true
+        rm -rf "$STAGE"
+    fi
+    [ "$CREATED" = true ] || return 0
     echo
     echo "Setup stopped before it finished. To remove the half-made site:"
-    echo "  studio delete --path=\"$SITE_PATH\""
+    if [ "$IN_SCRIPT_DIR" = true ]; then
+        # Without --no-files Studio would move this whole folder to the trash,
+        # including install.sh and .git.
+        echo "  studio delete --path=\"$SITE_PATH\" --no-files"
+        echo "  git -C \"$SITE_PATH\" clean -fdX    # removes WordPress; preview with -ndX first"
+    else
+        echo "  studio delete --path=\"$SITE_PATH\""
+    fi
     [ "$DB" = "mysql" ] && echo "  docker compose -p \"$SLUG-studio\" down -v"
     return 0
 }
@@ -276,6 +303,29 @@ trap on_exit EXIT
 
 step "Studio site"
 mkdir -p "$SITE_PATH"
+
+# Studio only creates a site in an empty folder or one that already holds
+# WordPress. For this script's folder, let Studio set WordPress up in an empty
+# temporary folder first, move it in, and forget the temporary site.
+if [ "$IN_SCRIPT_DIR" = true ]; then
+    STAGE="$(mktemp -d "${TMPDIR:-/tmp}/studio-installer.XXXXXX")"
+    echo "Preparing WordPress in a temporary folder"
+    CREATED=true
+    studio create --path="$STAGE" --name="$NAME (temporary)" --php="$PHP" --wp="$WP" \
+        --start=false --skip-browser --skip-log-details </dev/null >/dev/null
+    studio delete --path="$STAGE" --no-files >/dev/null
+    # Studio writes its AI instruction files again for the real site, and
+    # doesn't replace ones you already have.
+    for f in "$STAGE"/* "$STAGE"/.[!.]*; do
+        [ -e "$f" ] || continue
+        case "$(basename "$f")" in
+            STUDIO.md|AGENTS.md|CLAUDE.md|.agents|.claude) continue ;;
+        esac
+        mv "$f" "$SITE_PATH/"
+    done
+    rm -rf "$STAGE"
+    STAGE=""
+fi
 
 create_args=(
     --path="$SITE_PATH"
@@ -404,6 +454,12 @@ else
     echo "Password:  the one you entered"
 fi
 echo "Folder:    $SITE_PATH"
+if [ "$IN_SCRIPT_DIR" = true ]; then
+    echo
+    echo "To remove this site later, keep its files out of Studio's delete:"
+    echo "  studio delete --path=\"$SITE_PATH\" --no-files"
+    echo "  git clean -fdX    # removes WordPress and the database; preview with -ndX first"
+fi
 if [ "$DB" = "mysql" ]; then
     echo "MySQL:     127.0.0.1:$DB_PORT, database 'wordpress', user 'wp', password 'wp'"
     echo "           Start and stop it from the site folder with: docker compose up -d / docker compose stop"

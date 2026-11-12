@@ -12,7 +12,8 @@
 # real files, so the router finds them. The folders have no index.php, so
 # subsite front-end pages still go through WordPress as normal.
 #
-# Re-run it after adding a subsite. The site must be running.
+# Re-run it after adding a subsite. The site must be running. If the site
+# folder is a git repo, the folders are added to .git/info/exclude.
 #
 # Usage: scripts/subsite-links.sh [--path=<site folder>]   (default: current folder)
 
@@ -22,7 +23,7 @@ SITE_PATH="$PWD"
 for arg in "$@"; do
     case "$arg" in
         --path=*) SITE_PATH="${arg#--path=}" ;;
-        -h|--help) sed -n '3,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        -h|--help) sed -n '3,18p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
         *) echo "Unknown option: $arg"; exit 1 ;;
     esac
 done
@@ -64,6 +65,11 @@ for p in $PATHS; do
     for t in "${TARGETS[@]}"; do
         ln -sfn "../$t" "$slug/$t"
     done
+
+    # Keep the link folders out of git when the site is in a repo.
+    if [ -d .git/info ] && ! grep -qx "/$slug/" .git/info/exclude 2>/dev/null; then
+        echo "/$slug/" >> .git/info/exclude
+    fi
 
     echo "Linked /$slug/"
 done

@@ -19,7 +19,7 @@ Tested with Studio CLI 2.2.0.
   through WordPress.
   - The script gets subsites from `studio wp site list`. **Re-run it after adding a subsite.**
   - It skips a subsite whose slug matches a real file or folder in the site root.
-  - If the site folder is a git repo, ignore these folders.
+  - If the site folder is a git repo, the script adds the folders to `.git/info/exclude`.
 
 ### Studio's localhost requests (custom domain only)
 
@@ -43,6 +43,17 @@ and failed the TLS handshake over HTTPS, even with the name pointed at `127.0.0.
 therefore offers subdirectory networks only and rejects `--type=subdomain`.
 
 ## Studio CLI quirks
+
+### Only empty folders or existing WordPress
+
+`studio create` stops with "The selected directory is not empty nor an existing WordPress site"
+for a folder that has other files in it, such as this repo. The installer stages WordPress in a
+temporary folder first; see [setup.md](setup.md).
+
+### `studio delete` trashes the whole folder
+
+`studio delete` moves the site's entire folder to the trash by default. For a site installed in
+the repo folder that includes `install.sh` and `.git`, so use `studio delete --no-files` there.
 
 ### Its own prompts
 
